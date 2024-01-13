@@ -5,18 +5,27 @@ import re
 
 
 _CONFIG_DEFAULTS = {
-    'NAMESPACE': (str, 'Database', None),
-    'INFLUX_DB_ADDRESS': (str, 'Database', 'influxdb'),
-    'INFLUX_DB_PORT': (int, 'Database', 8086),
-    'INFLUX_DB_USER': (str, 'Database', None),
-    'INFLUX_DB_PASSWORD': (str, 'Database', None),
-    'INFLUX_DB_DATABASE': (str, 'Database', 'speedtests'),
-    'INFLUX_DB_TAGS': (str, 'Database', None),
+    'NAMESPACE': (str, 'Influx DB', None),
+    'INFLUX_DB_ADDRESS': (str, 'Influx DB', 'influxdb'),
+    'INFLUX_DB_PORT': (int, 'Influx DB', 8086),
+    'INFLUX_DB_USER': (str, 'Influx DB', None),
+    'INFLUX_DB_PASSWORD': (str, 'Influx DB', None),
+    'INFLUX_DB_DATABASE': (str, 'Influx DB', 'speedtests'),
+    'INFLUX_DB_TAGS': (str, 'Influx DB', None),
     'SPEEDTEST_INTERVAL': (int, 'SpeedTest', 180),
     'SPEEDTEST_SERVER_ID': (str, 'SpeedTest', None),
     'PING_TARGETS': (str, 'PingTest', '1.1.1.1, 8.8.8.8'),
     'PING_INTERVAL': (int, 'PingTest', 120),
-    'LOG_TYPE': (str, 'Logs', 'info'),
+    'LOG_TYPE': (str, 'General', 'info'),
+    'USE_INFLUX_ONE': (bool, 'General', True),
+    'USE_INFLUX_TWO': (bool, 'General', False),
+    'INFLUX_TWO_TOKEN': (str, 'Influx DB', None),
+    'INFLUX_TWO_ORG': (str, 'Influx DB', 'SpeedTest'),
+    'INFLUX_TWO_BUCKET': (str, 'Influx DB', 'speedtests'),
+    'INFLUX_TWO_ADDRESS': (str, 'Influx DB', 'influxdb2'),
+    'INFLUX_TWO_PORT': (int, 'Influx DB', 8086),
+    'INFLUX_TWO_USER': (str, 'Influx DB', None),
+    'INFLUX_TWO_PASSWORD': (str, 'Influx DB', None)
 }
 
 
@@ -26,7 +35,15 @@ class Config:
         """ Cast any value in the config to the right type or use the default
         """
         key, definition_type, section, default = self._define(key)
+        if definition_type == bool:
+            my_val = os.getenv(key, default)
+            if isinstance(my_val, bool):
+                return my_val
+            else:
+                return my_val.lower() == 'true'
         my_val = definition_type(os.getenv(key, default))
+        if my_val == 'None' and not default:
+            my_val = None
         return my_val
 
     def _define(self, name):
