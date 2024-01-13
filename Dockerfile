@@ -1,6 +1,6 @@
 FROM python:3.11-slim-buster
-LABEL maintainer="Breadlysm" \
-    description="Original by Aiden Gilmartin. Maintained by Breadlysm"
+LABEL maintainer="nategerhart" \
+    description="Original by Breadlysm. Maintained by nategerhart"
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -23,7 +23,7 @@ RUN apt-get -q -y install --no-install-recommends apt-utils gnupg1 apt-transport
 # RUN mv /opt/speedtest /usr/bin/speedtest
 # RUN rm /opt/speedtest.tgz
 
-#Option 2 - Install from apt
+#Option 2 - Recommended by Speed Test
 # This is the suggested method from https://www.speedtest.net/apps/cli just dockerized
 RUN curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | bash
 RUN apt-get -q -y install speedtest
