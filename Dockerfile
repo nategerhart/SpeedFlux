@@ -1,6 +1,6 @@
 FROM python:3.11-slim-buster
 LABEL maintainer="nategerhart" \
-    description="Original by Breadlysm. Maintained by nategerhart"
+    description="Internet speed monitor"
 
 ENV DEBIAN_FRONTEND=noninteractive
 
