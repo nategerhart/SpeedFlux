@@ -1,0 +1,13 @@
+{
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "configMigration": true,
+    "extends": [
+        "config:best-practices",
+        ":rebaseStalePrs",
+        "mergeConfidence:all-badges"
+    ],
+    "timezone": "America/Denver",
+    "rollbackPrs": true,
+    "dependencyDashboardAutoclose": false,
+    "internalChecksFilter": "strict"
+}
