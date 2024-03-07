@@ -42,7 +42,7 @@ The variables available are:
 - INFLUX_DB_DATABASE = default - speedtests
 - INFLUX_DB_TAGS = default - None *See below for options, '*' widcard for all *
 - SPEEDTEST_INTERVAL = default - 5 (minutes)
-- SPEEDTEST_SERVER_ID = default - {blank} *id from <https://c.speedtest.net/speedtest-servers-static.php>*
+- SPEEDTEST_SERVER_ID = default - {blank} *provide a single id or a comma separated list of ids from <https://c.speedtest.net/speedtest-servers-static.php>*
 - PING_INTERVAL = default - 5 (seconds)
 - PING_TARGETS = default - 1.1.1.1, 8.8.8.8 (csv of hosts to ping)
 - LOG_TYPE = info
@@ -99,8 +99,7 @@ If you already have Docker and Docker Compose installed, you can use the include
     ```
      docker run -d -t --name speedflux \
     -e 'NAMESPACE'='None' \
-
- -e 'USE_INFLUX_ONE='true' \
+    -e 'USE_INFLUX_ONE='true' \
     -e 'INFLUX_DB_ADDRESS'='influxdb' \
     -e 'INFLUX_DB_PORT'='8086' \
     -e 'INFLUX_DB_USER'='*influx_user*' \
@@ -119,4 +118,4 @@ Any suggestions should be made via pull requests. I will review and merge them a
 
 ---
 
-This script looks to have been originally written by <https://github.com/aidengilmartin/speedtest-to-influxdb/blob/master/main.py> and I forked it from <https://github.com/breadlysm/speedtest-to-influxdb>. They did the hard work, I've continued to modify it though to fit my needs.
+This script looks to have been originally written by <https://github.com/aidengilmartin/speedtest-to-influxdb/blob/master/main.py> and I forked it from <https://github.com/breadlysm/speedtest-to-influxdb>. They did the hard work, I've continued to modify it to fit my needs.
