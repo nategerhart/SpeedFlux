@@ -33,8 +33,8 @@ The InfluxDB connection settings are controlled by environment variables.
 The variables available are:
 
 - NAMESPACE = default - None
-- USE_INFLUX_ONE = default - None
-- USE_INFLUX_TWO = default - None
+- USE_INFLUX_ONE = default - True
+- USE_INFLUX_TWO = default - False
 - INFLUX_DB_ADDRESS = default - influxdb
 - INFLUX_DB_PORT = default - 8086
 - INFLUX_DB_USER = default - {blank}
@@ -42,14 +42,15 @@ The variables available are:
 - INFLUX_DB_DATABASE = default - speedtests
 - INFLUX_DB_TAGS = default - None *See below for options, '*' widcard for all *
 - SPEEDTEST_INTERVAL = default - 5 (minutes)
-- SPEEDTEST_SERVER_ID = default - {blank} *id from <https://c.speedtest.net/speedtest-servers-static.php>*
+- SPEEDTEST_SERVER_ID = default - {blank} *provide a single id or a comma separated list of ids from <https://c.speedtest.net/speedtest-servers-static.php>*
+- SPEEDTEST_LOOP_SERVER_IDS = default - False *Loop through the list of ids passed to `SPEEDTEST_SERVER_ID` on each run*
 - PING_INTERVAL = default - 5 (seconds)
 - PING_TARGETS = default - 1.1.1.1, 8.8.8.8 (csv of hosts to ping)
 - LOG_TYPE = info
 
 ### Variable Notes
 
-- You must setup either USE_INFLUX_ONE or USE_INFLUX_TWO to true.
+- You must set either USE_INFLUX_ONE or USE_INFLUX_TWO to true.
 - Intervals are in minutes. *Script will convert it to seconds.*
 - If any variables are not needed, don't declare them. Functions will operate with or without most variables.
 - Tags should be input without quotes. *INFLUX_DB_TAGS = isp, interface, external_ip, server_name, speedtest_url*
@@ -99,8 +100,7 @@ If you already have Docker and Docker Compose installed, you can use the include
     ```
      docker run -d -t --name speedflux \
     -e 'NAMESPACE'='None' \
-
- -e 'USE_INFLUX_ONE='true' \
+    -e 'USE_INFLUX_ONE='true' \
     -e 'INFLUX_DB_ADDRESS'='influxdb' \
     -e 'INFLUX_DB_PORT'='8086' \
     -e 'INFLUX_DB_USER'='*influx_user*' \
@@ -119,4 +119,4 @@ Any suggestions should be made via pull requests. I will review and merge them a
 
 ---
 
-This script looks to have been originally written by <https://github.com/aidengilmartin/speedtest-to-influxdb/blob/master/main.py> and I forked it from <https://github.com/breadlysm/speedtest-to-influxdb>. They did the hard work, I've continued to modify it though to fit my needs.
+This script looks to have been originally written by <https://github.com/aidengilmartin/speedtest-to-influxdb/blob/master/main.py> and I forked it from <https://github.com/breadlysm/speedtest-to-influxdb>. They did the hard work, I've continued to modify it to fit my needs.
