@@ -32,5 +32,7 @@ def initialize():
         except Exception as err:
             raise SystemExit("Couldn't initiate InfluxDB 2+", err)
     else:
-        raise SystemExit("You must setup a Bool ENV specifying Influx"
-                         " USE_INFLUX_ONE or USE_INFLUX_TWO")
+        raise SystemExit(
+            "You must setup a Bool ENV specifying Influx"
+            " USE_INFLUX_ONE or USE_INFLUX_TWO"
+        )
