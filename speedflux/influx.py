@@ -12,7 +12,7 @@ class InfluxDB:
             self._client = InfluxDBClient(
                 url=self.url, token=self.token, org=self.org, debug=False
             )
-            speedflux.LOG.debug("Client extablished")
+            speedflux.LOG.debug("Client established")
         return self._client
 
     def write(self, data):
