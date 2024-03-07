@@ -25,12 +25,13 @@ def speedtest():
                 "--accept-license",
                 "--accept-gdpr",
                 "-f",
-                "json" f"--server-id={selected_server}",
+                "json",
+                f"--server-id={selected_server}",
             ],
             capture_output=True,
         )
         speedflux.LOG.info(
-            "Randomly selected Server ID from user provided list: {selected_server}"
+            f"Randomly selected server from user list : ID = {selected_server}"
         )
         speedtest_parse(speedtest)
 
@@ -47,7 +48,7 @@ def speedtest():
                 ],
                 capture_output=True,
             )
-            speedflux.LOG.info(f"User selected Server ID: {server_id}")
+            speedflux.LOG.info(f"User selected server : ID = {server_id}")
             speedtest_parse(speedtest)
 
 
