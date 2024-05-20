@@ -1,4 +1,4 @@
 pythonping==1.1.4
-requests==2.32.0
+requests==2.32.1
 influxdb==5.3.2
 influxdb-client==1.43.0
