@@ -1,5 +1,5 @@
 # ---- Stage 1: Builder ----
-FROM debian:12-slim AS builder
+FROM python:3.12-slim AS builder
 
 # Install Python, pip, curl, gnupg for speedtest repo setup
 RUN apt-get update && apt-get install -y \
@@ -13,7 +13,7 @@ RUN curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/scr
 
 # Install Python dependencies into /install
 COPY requirements.txt /tmp/
-RUN pip install --no-cache-dir --prefix=/install -r /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
 # Copy only necessary app source files
 COPY main.py /app/main.py
@@ -25,13 +25,8 @@ RUN mkdir -p /speedtest-libs && \
     awk '/=>/ { print $3 }' | \
     xargs -I '{}' cp -v '{}' /speedtest-libs/ || true
 
-# Figure out site-packages path in builder and copy to /python-deps
-RUN PY_SITE=$(python3 -c "import site; print(site.getsitepackages()[0])") \
-    && mkdir -p /python-deps \
-    && cp -a "$PY_SITE" /python-deps/site-packages
-
-# Fix permissions for OpenShift (root group ownership + group writable)
-RUN chown -R 0:0 /app && chmod -R g=u /app
+# # Fix permissions for OpenShift (root group ownership + group writable)
+# RUN chown -R 0:0 /app && chmod -R g=u /app
 
 # ---- Stage 2: Runtime ----
 # Use debug non-root distroless variant for initial testing
@@ -41,20 +36,18 @@ FROM gcr.io/distroless/python3-debian12:debug-nonroot
 # Switch to non-root user
 USER 1001
 
-# Copy installed Python packages
-COPY --from=builder /install /usr/local
-
+# Copy the packages we need from our build container
+COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 
 # Copy speedtest binary & required libs
 COPY --from=builder /usr/bin/speedtest /usr/bin/
 COPY --from=builder /speedtest-libs/ /usr/lib/
 
-# Copy Python deps and app
-COPY --from=builder /python-deps/site-packages /site-packages
-COPY --from=builder /app /app
+# Copy  app
+COPY --from=builder --chown=0:0 --chmod=775 /app /app
 
-# Make sure Python can see deps
-ENV PYTHONPATH=/site-packages
+# Set environment variable so Python can find the packages we installed
+ENV PYTHONPATH=/usr/local/lib/python3.12/site-packages
 
 WORKDIR /app
 CMD ["main.py"]
