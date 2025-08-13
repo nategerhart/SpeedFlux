@@ -13,7 +13,7 @@ RUN curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/scr
 
 # Install Python dependencies into /install
 COPY requirements.txt /tmp/
-RUN pip install --prefix=/install -r /tmp/requirements.txt
+RUN pip install --no-cache-dir --prefix=/install -r /tmp/requirements.txt
 
 # Copy only necessary app source files
 COPY main.py /app/main.py
@@ -24,6 +24,11 @@ RUN mkdir -p /speedtest-libs && \
     ldd /usr/bin/speedtest | \
     awk '/=>/ { print $3 }' | \
     xargs -I '{}' cp -v '{}' /speedtest-libs/ || true
+
+# Figure out site-packages path in builder and copy to /python-deps
+RUN PY_SITE=$(python3 -c "import site; print(site.getsitepackages()[0])") \
+    && mkdir -p /python-deps \
+    && cp -a "$PY_SITE" /python-deps/site-packages
 
 # Fix permissions for OpenShift (root group ownership + group writable)
 RUN chown -R 0:0 /app && chmod -R g=u /app
@@ -39,12 +44,17 @@ USER 1001
 # Copy installed Python packages
 COPY --from=builder /install /usr/local
 
+
 # Copy speedtest binary & required libs
 COPY --from=builder /usr/bin/speedtest /usr/bin/
 COPY --from=builder /speedtest-libs/ /usr/lib/
 
-# Copy application source files
+# Copy Python deps and app
+COPY --from=builder /python-deps/site-packages /site-packages
 COPY --from=builder /app /app
+
+# Make sure Python can see deps
+ENV PYTHONPATH=/site-packages
 
 WORKDIR /app
 CMD ["main.py"]
