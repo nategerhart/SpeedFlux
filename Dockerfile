@@ -1,43 +1,53 @@
-FROM python:3.11-slim-buster
-LABEL maintainer="nategerhart" \
-    description="Internet speed monitor"
+# ---- Stage 1: Builder ----
+FROM python:3.12-slim AS builder
 
-ENV DEBIAN_FRONTEND=noninteractive
+# Install Python, pip, curl, gnupg for speedtest repo setup
+RUN apt-get update && apt-get install -y \
+    python3 python3-pip curl gnupg \
+  && rm -rf /var/lib/apt/lists/*
 
-# Install dependencies
-RUN apt-get update
-RUN apt-get -q -y install --no-install-recommends apt-utils gnupg1 apt-transport-https dirmngr curl
+# Add Ookla Speedtest CLI repository & install
+RUN curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | bash \
+  && apt-get update && apt-get install -y speedtest \
+  && rm -rf /var/lib/apt/lists/*
 
-# Install Speedtest
-#Option 0 - Install from apt (not working or bad source)
-# RUN curl -s https://install.speedtest.net/app/cli/install.deb.sh --output /opt/install.deb.sh
-# RUN bash /opt/install.deb.sh
-# RUN apt-get update && apt-get -q -y install speedtest
-# RUN rm /opt/install.deb.sh
+# Install Python dependencies into /install
+COPY requirements.txt /tmp/
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
-#Option 1 - Install from source
-# Download https://install.speedtest.net/app/cli/ookla-speedtest-1.2.0-linux-x86_64.tgz
-# and place the binary in /usr/bin/speedtest (per https://github.com/breadlysm/SpeedFlux/issues/36#issuecomment-1609954934)
-# RUN curl -s https://install.speedtest.net/app/cli/ookla-speedtest-1.2.0-linux-x86_64.tgz --output /opt/speedtest.tgz
-# RUN tar -xvf /opt/speedtest.tgz -C /opt
-# RUN mv /opt/speedtest /usr/bin/speedtest
-# RUN rm /opt/speedtest.tgz
+# Copy only necessary app source files
+COPY main.py /app/main.py
+COPY speedflux /app/speedflux
 
-#Option 2 - Recommended by Speed Test
-# This is the suggested method from https://www.speedtest.net/apps/cli just dockerized
-RUN curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | bash
-RUN apt-get -q -y install speedtest
+# Collect all shared libs required by speedtest
+RUN mkdir -p /speedtest-libs && \
+    ldd /usr/bin/speedtest | \
+    awk '/=>/ { print $3 }' | \
+    xargs -I '{}' cp -v '{}' /speedtest-libs/ || true
 
-# Clean up
-RUN apt-get -q -y autoremove && apt-get -q -y clean
-RUN rm -rf /var/lib/apt/lists/*
+# # Fix permissions for OpenShift (root group ownership + group writable)
+# RUN chown -R 0:0 /app && chmod -R g=u /app
 
-# Copy and final setup
-ADD . /app
+# ---- Stage 2: Runtime ----
+# Use debug non-root distroless variant for initial testing
+# FROM gcr.io/distroless/python3-debian11-debug-nonroot
+FROM gcr.io/distroless/python3-debian12:nonroot
+
+# Switch to non-root user
+USER 1001
+
+# Copy the packages we need from our build container
+COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+
+# Copy speedtest binary & required libs
+COPY --from=builder /usr/bin/speedtest /usr/bin/
+COPY --from=builder /speedtest-libs/ /usr/lib/
+
+# Copy  app
+COPY --from=builder --chown=1001:0 --chmod=775 /app /app
+
+# Set environment variable so Python can find the packages we installed
+ENV PYTHONPATH=/usr/local/lib/python3.12/site-packages
+
 WORKDIR /app
-COPY requirements.txt requirements.txt
-RUN pip install -r requirements.txt
-COPY . .
-
-# Excetution
-CMD ["python", "main.py"]
+CMD ["main.py"]
