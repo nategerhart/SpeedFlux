@@ -1,5 +1,5 @@
 # ---- Stage 1: Builder ----
-FROM python:3.12-slim AS builder
+FROM python:3.13-slim AS builder
 
 # Install Python, pip, curl, gnupg for speedtest repo setup
 RUN apt-get update && apt-get install -y \
