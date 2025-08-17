@@ -1,5 +1,6 @@
-# ---- Stage 1: Builder ----
 ARG PYTHON_VERSION=3.13
+
+# ---- Stage 1: Builder ----
 FROM python:${PYTHON_VERSION}-slim AS builder
 
 # Install Python, pip, curl, gnupg for speedtest repo setup
@@ -38,7 +39,7 @@ FROM gcr.io/distroless/python3-debian12:nonroot
 USER 1001
 
 # Copy the packages we need from our build container
-COPY --from=builder /usr/local/lib/${PYTHON_VERSION}/site-packages /usr/local/lib/${PYTHON_VERSION}/site-packages
+COPY --from=builder /usr/local/lib/python*/site-packages /usr/local/lib/python*/site-packages
 
 # Copy speedtest binary & required libs
 COPY --from=builder /usr/bin/speedtest /usr/bin/
@@ -48,7 +49,7 @@ COPY --from=builder /speedtest-libs/ /usr/lib/
 COPY --from=builder --chown=1001:0 --chmod=775 /app /app
 
 # Set environment variable so Python can find the packages we installed
-ENV PYTHONPATH=/usr/local/lib/${PYTHON_VERSION}/site-packages
+ENV PYTHONPATH=/usr/local/lib/python*/site-packages
 
 WORKDIR /app
 CMD ["main.py"]
