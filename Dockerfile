@@ -37,7 +37,7 @@ FROM gcr.io/distroless/python3-debian12:nonroot
 USER 1001
 
 # Copy the packages we need from our build container
-COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=builder /usr/local/lib/python3.13/site-packages /usr/local/lib/python3.12/site-packages
 
 # Copy speedtest binary & required libs
 COPY --from=builder /usr/bin/speedtest /usr/bin/
@@ -51,4 +51,5 @@ ENV PYTHONPATH=/usr/local/lib/python3.13/site-packages
 
 WORKDIR /app
 CMD ["main.py"]
+
 
