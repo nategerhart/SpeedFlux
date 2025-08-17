@@ -47,7 +47,8 @@ COPY --from=builder /speedtest-libs/ /usr/lib/
 COPY --from=builder --chown=1001:0 --chmod=775 /app /app
 
 # Set environment variable so Python can find the packages we installed
-ENV PYTHONPATH=/usr/local/lib/python3.12/site-packages
+ENV PYTHONPATH=/usr/local/lib/python3.13/site-packages
 
 WORKDIR /app
 CMD ["main.py"]
+
