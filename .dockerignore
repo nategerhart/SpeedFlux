@@ -1,4 +1,38 @@
+# Version control
 .git
+.gitignore
+.gitattributes
+
+# Docker-specific
 Dockerfile
+.dockerignore
+
+# OS / editor junk
 *~
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pytest_cache
+.venv
+env/
+venv/
+
+# Build artifacts
+dist/
+build/
+out/
+*.egg-info
+
+# Logs
+*.log
+
+# Docs
 README.md
+docs/
